@@ -7,8 +7,6 @@ import 'package:the_meal_db/widgets/homeWidgets/homeDetailsPage.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:http/http.dart' as http;
 import 'package:getwidget/getwidget.dart';
-// import 'dart:ui';
-// import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -26,7 +24,7 @@ class _HomePageState extends State<HomePage> {
 
   loadData() async {
     String url = "http://www.themealdb.com/api/json/v1/1/random.php";
-    // await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     final response = await http.get(Uri.parse(url));
     final decodeData = jsonDecode(response.body);
     final productsData = decodeData["meals"];
@@ -45,117 +43,132 @@ class _HomePageState extends State<HomePage> {
       //   bottomOpacity: 0.0,
       // ),
       body: SafeArea(
-        child: ListView.builder(
-          itemCount: MealModel.meals.count(),
-          itemBuilder: (BuildContext context, int index) {
-            final meal = MealModel.meals[index];
-            return InkWell(
-              onTap: () {
-                Navigator.push(
-                    context, SizeTransition5(HomeDetailPage(meal: meal)));
-              },
-              child: Column(
-                children: [
-                  "Meal Of The Day"
-                      .text
-                      .xl5
-                      .capitalize
-                      .semiBold
-                      .fontFamily(
-                          GoogleFonts.dancingScript().fontFamily.toString())
-                      .make()
-                      .p20(),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: GFCard(
+        child: RefreshIndicator(
+          edgeOffset: 50.0,
+          strokeWidth: 4,
+          color: Theme.of(context).colorScheme.onSecondary,
+          onRefresh: () async {
+            return await loadData();
+          },
+          child: ListView.builder(
+            itemCount: MealModel.meals.count(),
+            itemBuilder: (BuildContext context, int index) {
+              final meal = MealModel.meals[index];
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                      context, SizeTransition5(HomeDetailPage(meal: meal)));
+                },
+                child: Column(
+                  children: [
+                    "Meal Of The Day"
+                        .text
+                        .xl6
+                        .capitalize
+                        .bold
+                        .fontFamily(
+                            GoogleFonts.dancingScript().fontFamily.toString())
+                        .make()
+                        .p20(),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: GFCard(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                        boxFit: BoxFit.cover,
+                        padding: Vx.m2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25)),
+                        content: ClipRRect(
+                          borderRadius: BorderRadius.circular(25),
+                          child: (meal.strMealThumb != null &&
+                                  meal.strMealThumb!.isNotEmpty)
+                              ? CachedNetworkImage(
+                                  imageUrl: meal.strMealThumb.toString(),
+                                  alignment: Alignment.center,
+                                  fit: BoxFit.fill,
+                                )
+                              : const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                        ),
+                      ),
+                    ),
+                    GFCard(
                       boxFit: BoxFit.cover,
-                      padding: Vx.m4,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25)),
-                      content: ClipRRect(
-                          borderRadius: BorderRadius.circular(25),
-                          child: CachedNetworkImage(
-                            imageUrl: meal.strMealThumb.toString(),
-                            alignment: Alignment.center,
-                            fit: BoxFit.fill,
-                          )),
-                    ),
-                  ),
-                  GFCard(
-                    boxFit: BoxFit.cover,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25)),
-                    title: GFListTile(
-                      title: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: "Name : "
+                      title: GFListTile(
+                        title: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: "Name : "
+                                      .text
+                                      .bold
+                                      .xl3
+                                      .fontFamily(GoogleFonts.poppins()
+                                          .fontFamily
+                                          .toString())
+                                      .make(),
+                                ),
+                                Expanded(
+                                    child: meal.strMeal!.text.xl3
+                                        .overflow(TextOverflow.ellipsis)
+                                        .maxLines(1)
+                                        .fontFamily(GoogleFonts.poppins()
+                                            .fontFamily
+                                            .toString())
+                                        .make())
+                              ],
+                            ).py16(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                "Category : "
                                     .text
-                                    .semiBold
+                                    .bold
                                     .xl3
-                                    .fontFamily(GoogleFonts.dancingScript()
+                                    .fontFamily(GoogleFonts.poppins()
                                         .fontFamily
                                         .toString())
                                     .make(),
-                              ),
-                              Expanded(
-                                  child: meal.strMeal!.text.semiBold.xl3
-                                      .overflow(TextOverflow.ellipsis)
-                                      .maxLines(1)
-                                      .fontFamily(GoogleFonts.dancingScript()
-                                          .fontFamily
-                                          .toString())
-                                      .make())
-                            ],
-                          ).py16(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              "Category : "
-                                  .text
-                                  .semiBold
-                                  .xl3
-                                  .fontFamily(GoogleFonts.dancingScript()
-                                      .fontFamily
-                                      .toString())
-                                  .make(),
-                              meal.strCategory!.text.semiBold.xl3
-                                  .fontFamily(GoogleFonts.dancingScript()
-                                      .fontFamily
-                                      .toString())
-                                  .make()
-                            ],
-                          ).py16(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              "Country Of Origin : "
-                                  .text
-                                  .semiBold
-                                  .xl3
-                                  .fontFamily(GoogleFonts.dancingScript()
-                                      .fontFamily
-                                      .toString())
-                                  .make(),
-                              meal.strArea!.text.semiBold.xl3
-                                  .fontFamily(GoogleFonts.dancingScript()
-                                      .fontFamily
-                                      .toString())
-                                  .make()
-                            ],
-                          ).py16(),
-                        ],
+                                meal.strCategory!.text.xl3
+                                    .fontFamily(GoogleFonts.poppins()
+                                        .fontFamily
+                                        .toString())
+                                    .make()
+                              ],
+                            ).py16(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                "Origin : "
+                                    .text
+                                    .bold
+                                    .xl3
+                                    .fontFamily(GoogleFonts.poppins()
+                                        .fontFamily
+                                        .toString())
+                                    .make(),
+                                meal.strArea!.text.xl3
+                                    .fontFamily(GoogleFonts.poppins()
+                                        .fontFamily
+                                        .toString())
+                                    .make()
+                              ],
+                            ).py16(),
+                          ],
+                        ),
                       ),
-                    ),
-                  )
-                ],
-              ),
-            );
-          },
-        ).backgroundColor(Theme.of(context).colorScheme.background),
+                    )
+                  ],
+                ),
+              );
+            },
+          ).backgroundColor(Theme.of(context).colorScheme.background),
+        ),
       ),
     );
   }

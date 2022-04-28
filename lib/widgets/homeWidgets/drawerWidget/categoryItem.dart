@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:the_meal_db/model/categoryItemModel.dart';
 import 'package:http/http.dart' as http;
 import 'package:velocity_x/velocity_x.dart';
-import 'package:the_meal_db/widgets/drawer.dart';
 
 class CategoryItem extends StatefulWidget {
   const CategoryItem({Key? key}) : super(key: key);
